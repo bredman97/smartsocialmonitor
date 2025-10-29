@@ -7,6 +7,7 @@ from backend.prepare_json import get_policy_info
 import time
 
 
+
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.BOOTSTRAP])
 load_figure_template('CYBORG')
 app.title = "Privacy Dashboard"

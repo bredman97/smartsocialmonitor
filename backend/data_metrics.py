@@ -1,5 +1,5 @@
 import math
-from prepare_data import get_data
+from backend.prepare_data import get_data
 
 class Controller:
     def __init__(self):

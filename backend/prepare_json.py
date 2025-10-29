@@ -1,11 +1,9 @@
 import json
-
+from backend.prepare_data import get_privacyspy_data
 def get_policy_info(search = 'youtube.com'):
     list_of_rubric = []
     # Load the JSON file
-    with open("privacyspy_products.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-
+    data = get_privacyspy_data()
 
     for product in data:
         hostnames = product.get('hostnames')
