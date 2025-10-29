@@ -1,16 +1,16 @@
-import pandas as pd
+import math
+from prepare_data import get_data
 
 class Controller:
     def __init__(self):
 
         # Load CSV files
-        self.trackers = pd.read_csv("full_sites_trackers.csv")
-        self.sites = pd.read_csv("sites_full.csv")
+        self.trackers = get_data()['sites_trackers']
+        self.sites = get_data()['sites']
 
     def get_category_numbers(self, site = 'google.com'):
         # gets the number of trackers in each category
         trackers = self.trackers
-        sites = self.sites
         match_site = trackers[trackers['site'] == site]
 
         category_counts = (
@@ -22,7 +22,7 @@ class Controller:
 
         total = category_counts["num_trackers"].sum()
         category_counts["percent"] = (category_counts["num_trackers"] / total * 100).round(2)
-        category_counts["total_trackers"] = sites['total_trackers']
+        #category_counts["total_trackers"] = sites['total_trackers']
         
         #returns dataframe
         return category_counts
@@ -46,9 +46,9 @@ class Controller:
         if match_site.empty:
             return None
         
-        score = int(match_site['privacy_score'].iloc[0])
+        score = float(match_site['privacy_score'].iloc[0])
 
-        return score
+        return math.floor(score)
 
     def get_tracker_total(self, site = 'google.com'):
         #get the total # of trackers seen on a site
@@ -74,7 +74,7 @@ class Controller:
         
         companies = float(match_site['companies'].iloc[0])
 
-        return companies
+        return round(companies, 2)
     
     def get_tracked(self, site = 'google.com'):
         # gets tracked value used for privacy score
@@ -97,7 +97,7 @@ class Controller:
             return None
         
         percentage = float(match_site['percentage_tracking_requests'].iloc[0])
-        return percentage
+        return round(percentage, 2)
     
     def get_avg_trackers_on_site(self, site = 'google.com'):
         # gets avg number of trackers on a site at any given time
@@ -110,7 +110,7 @@ class Controller:
         
         avg_trackers_on_site = float(match_site['trackers'].iloc[0])
 
-        return avg_trackers_on_site
+        return round(avg_trackers_on_site)
     
     def get_referer_leaked(self, site = 'google.com'):
         # gets referer leaked score which is used for privacy score
