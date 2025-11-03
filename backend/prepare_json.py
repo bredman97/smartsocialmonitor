@@ -1,4 +1,3 @@
-import json
 from backend.prepare_data import get_privacyspy_data
 def get_policy_info(search = 'youtube.com'):
     list_of_rubric = []
@@ -45,5 +44,3 @@ def get_policy_info(search = 'youtube.com'):
                     })
 
         return list_of_rubric
-
-#print(get_policy_info()[0])

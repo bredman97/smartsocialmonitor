@@ -2,8 +2,8 @@ from dash import Dash, dcc, html, Input, Output, State
 import plotly.express as px
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
-from backend.data_metrics import Controller
-from backend.prepare_json import get_policy_info
+from backend import data_metrics
+from backend import prepare_json
 import time
 
 
@@ -11,7 +11,7 @@ import time
 app = Dash(__name__, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.BOOTSTRAP])
 load_figure_template('CYBORG')
 app.title = "Privacy Dashboard"
-controller = Controller()
+controller = data_metrics.Controller()
 df = controller.sites
 site_options =  controller.list_of_domains()
 
@@ -122,7 +122,7 @@ app.layout = dbc.Container([
 )
 def update_dashboard(site):
     time.sleep(1)
-    site_data = get_policy_info(site)
+    site_data = prepare_json.get_policy_info(site)
     
     # Stats cards
     stats = [
