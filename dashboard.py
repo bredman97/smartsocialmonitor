@@ -340,7 +340,8 @@ def update_dashboard(search_click, site):
     )
     )
     fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)"
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color = 'white')
     )
     
     # ---------- Return dynamic dashboard content ----------
@@ -475,7 +476,8 @@ def update_comparison_gauge(n_clicks, compare_site):
         }
     ))
     fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)"
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color = 'white')
     )
 
     return dbc.Card(dbc.CardBody(dcc.Graph(figure=fig, id="comparison-gauge-chart"))), '', 6
