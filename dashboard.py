@@ -325,7 +325,7 @@ def update_dashboard(search_click, site):
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=privacy_score,
-        title={'text': f'{company_name.capitalize() if company_name else ''} Policy Score'},
+        title={'text': f"{company_name.capitalize() if company_name else ''} Policy Score"},
         gauge={
             'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Critical','Bad', 'Average', 'Good','Excellent']}, 
             'bar': {'color': "black"},   # needle/bar color
@@ -458,7 +458,7 @@ def update_comparison_gauge(n_clicks, compare_site):
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=compare_score,
-        title={'text': f'{compare_name.capitalize() if compare_name else ''} Policy Score'},
+        title={'text': f"{compare_name.capitalize() if compare_name else ''} Policy Score"},
         gauge={
             'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Critical','Bad', 'Average', 'Good','Excellent']},
             'bar': {'color': "black"},
