@@ -1,50 +1,14 @@
-/* =========================================================
-   THEME SYSTEM — CYBORG (DARK)
-   ========================================================= */
-:root {
-  /* Default = Dark (Cyborg) Theme */
-  --bg-color: #0d1117;
-  --card-bg: #1c1f24;
-  --accent-bg: #2b3139;
-  --accordion-bg: #1e2228;
-  --text-color: #e6e6e6;
-  --secondary-text: #adb5bd;
-  --border-color: #343a40;
-  --hover-bg: #2b3139;
-  --accent-color: #0d6efd;
 
-  /* Bootstrap badge colors */
-  --success-color: #198754;
-  --warning-color: #ffc107;
-  --danger-color: #dc3545;
-
-  /* Graph text color (dark mode default) */
-  --graph-text-color: #ffffff;
-}
-
-/* =========================================================
-   GLOBAL STRUCTURE & TYPOGRAPHY
-   ========================================================= */
-body {
-  background-color: var(--bg-color) !important;
-  color: var(--text-color) !important;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
-  transition: background-color 0.5s ease, color 0.5s ease;
-}
 
 h1, h2, h3, h4, h5 {
   letter-spacing: 0.5px;
-}
-
-/* Smooth transitions */
-html, body, .app-container {
-  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Container */
 .container-fluid {
   padding: 1.5rem !important;
 }
+
 @media (max-width: 768px) {
   .container-fluid { padding: 0.75rem !important; }
   h1 { font-size: 1.75rem; }
@@ -53,218 +17,119 @@ html, body, .app-container {
 /* =========================================================
    HEADER
    ========================================================= */
+/* =========================================================
+   HEADER BAR ALIGNMENT
+   ========================================================= */
+
+.search-bar,
+.compare-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.bar-input {
+    width: 100%;
+}
+
+/* Hide columns when inactive */
+.hidden {
+  display: none !important;
+}
+
+/* Ensure logo + bars + switch align properly */
 #header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-  text-align: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  gap: 1rem;
 }
+#header-switch,
+#header > .col,
+#header > div {
+  display: flex;
+  align-items: center;
+}
+
 
 #logo {
   height: 100%;
   width: 100%;
 }
 
-#title {
-  font-weight: 700;
-  text-align: center;
-  color: #ffffff; /* Force white header text always */
-}
-
-#dropdown-label {
-  font-weight: 600;
-  color: #ffffff !important; /* Stay white in all themes */
-}
-
-/* =========================================================
-   DROPDOWN COMPONENT
-   ========================================================= */
-#site-dropdown {
-  border-radius: 8px !important;
-  background-color: var(--card-bg) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-color) !important;
-}
-
-.Select-control {
-  border-radius: 0.5rem !important;
-  border: 1px solid var(--border-color) !important;
-  background-color: var(--card-bg) !important;
-  font-size: 0.95rem;
-  min-height: 40px;
-  color: var(--text-color) !important;
-}
-
-.Select-value-label {
-  color: var(--text-color) !important;
-  font-weight: bold;
-}
-
-.VirtualizedSelectOption {
-  background-color: var(--accent-bg);
-  color: var(--text-color);
-}
-
-.VirtualizedSelectFocusedOption {
-  background-color: var(--hover-bg);
-  color: var(--text-color);
-  font-weight: bold;
-}
-
-.Select-menu-outer {
-  border-radius: 0.5rem !important;
-  border: 1px solid var(--border-color) !important;
-}
-
-/* =========================================================
-   STATS CARDS
-   ========================================================= */
-#stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.stat-label {
-  text-align: center;
-  font-size: 0.95rem;
-  color: var(--secondary-text);
-}
-
-.stat-value {
-  text-align: center;
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--text-color);
-}
-.info-icon{
-  text-align: right;
-}
-
-.card {
-  border-radius: 12px !important;
-  border: none !important;
-  background-color: var(--card-bg) !important;
-  color: var(--text-color) !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25) !important;
-  transition: background-color 0.5s ease, box-shadow 0.3s ease, color 0.5s ease;
-}
 .card:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* =========================================================
-   BADGES & ACCORDIONS
-   ========================================================= */
-
-
-#rubric-sections .accordion-button::after {
-  order: -1;
-  margin-left: 0;
-  margin-right: 0.75rem;
+#Good.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-success) !important;
+  color:white;
+  font-weight: bold;
 }
-#rubric-sections .accordion-button {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  background-color: var(--accordion-bg);
-  color: var(--text-color);
-  border-bottom: none;
-  transition: background-color 0.5s ease, color 0.5s ease;
+#Neutral.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-dark) !important;
+  color:white;
+  font-weight: bold;
 }
-#rubric-sections .accordion-button:not(.collapsed) {
-  background-color: var(--accent-bg);
-  color: var(--text-color);
+#Bad.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-warning) !important;
+  color:white;
+  font-weight: bold;
 }
-#rubric-sections .accordion-button:focus {
-  box-shadow: none;
-  border-bottom: none;
+#Critical.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-danger) !important;
+  color:white;
+  font-weight: bold;
 }
 
-/* =========================================================
-   POLICY HEADER
-   ========================================================= */
-#policy-header {
-  display: flex;
-  flex-direction:row;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 1rem;
+#success.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-success) !important;
+  color:white;
+  font-weight: bold;
 }
 
-#rubric-sections .rubric-title {
-  display: flex;
-  flex-direction:row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+#warning.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-warning) !important;
+  color:white;
+  font-weight: bold;
 }
-
-#rubric-sections .rubric-title .badge{
-  margin-left: auto;
+#danger.accordion-item .accordion-button:not(.collapsed) {
+  background-color: var(--bs-danger) !important;
+  color:white;
+  font-weight: bold;
 }
-
-.policy-badge {
-  display: flex;
-  font-size: 2.0rem !important;
-  padding: 0.6em 0.6em !important;
-  border-radius: 0.75rem !important;
-  font-weight: 600;
-}
-
-
-
-
-/* =========================================================
-   GRAPHS
-   ========================================================= */
-.js-plotly-plot .plotly {
-  border-radius: 10px;
-  overflow: hidden;
-  transition: background-color 0.5s ease;
-}
-
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-#footer {
-  text-align: center;
-  color: var(--secondary-text);
-  border-top: 1px solid var(--border-color);
-  margin-top: 2rem;
-  padding-top: 1rem;
-  font-size: 0.9rem;
-}
-
 /* =========================================================
    RESPONSIVE GRID
    ========================================================= */
-@media (max-width: 992px) {
-  #stats-row .col-md-2 {
-    flex: 0 0 45%;
-    max-width: 45%;
-    margin-bottom: 1rem;
+@media (max-width: 760px) {
+  #header {
+    flex-direction: column;
+    align-items: stretch;
   }
-  #logo {width: 200px;}
+
+  .header-col,
+  .header-logo,
+  .header-switch {
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .bar-input {
+    width: 100%;
 }
+  #logo {width: 80%;}
+}
+
 @media (max-width: 576px) {
-  #stats-row .col-md-2 {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-  #company-name { font-size: 1.25rem; }
-  #logo {width: 150px;}
+  
+  #logo {width: 100%;}
 }
 
 
-@media (max-height: 700px), (max-width: 768px) {
-  #dashboard-content { max-height: none; }
-}
 
 

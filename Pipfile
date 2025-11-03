@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+dash = "*"
+flask = "*"
+flask-caching = "*"
+plotly = "*"
+dash-bootstrap-components = "*"
+dash-bootstrap-templates = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"
