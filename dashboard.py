@@ -18,6 +18,8 @@ app.title = "Privacy Dashboard"
 # initialize controller
 controller = data_metrics.Controller()
 
+sites = controller.get_site_list()
+
 # helper function for accordion header colors
 def grade_color(score):
     if score >= 75:
@@ -30,32 +32,22 @@ def grade_color(score):
 # makes sure data is aligned and correct
 def helper(privacyspy_data, tosdr_data):
     if isinstance(privacyspy_data, list) and isinstance(tosdr_data, dict):
-        privacyspy_hostnames = set(h.lower() for h in privacyspy_data[2]['hostnames'])
-        tosdr_hostnames = set(h.lower() for h in tosdr_data['urls'])
-
-        same_company = privacyspy_hostnames.intersection(tosdr_hostnames)
-
-        if not same_company:
-            points_component = html.Div('Please refine search...')
-            rubric_component = html.Div('Please refine search...')
-            privacy_score = None
-            name = None
-        else:
-            points_component = make_points_accordion(tosdr_data)
-            rubric_component = make_rubric_accordion(privacyspy_data)
-            privacy_score = controller.overall_privacy_score(privacyspy_data, tosdr_data)
-            name = tosdr_data['name']
+        
+        points_component = make_points_accordion(tosdr_data)
+        rubric_component = make_rubric_accordion(privacyspy_data)
+        privacy_score = controller.overall_privacy_score(privacyspy_data, tosdr_data)
+        name = tosdr_data['name']
 
     elif isinstance(privacyspy_data, list) ^ isinstance(tosdr_data, dict):
-            points_component = make_points_accordion(tosdr_data)
-            rubric_component = make_rubric_accordion(privacyspy_data)
-            privacy_score = controller.overall_privacy_score(privacyspy_data, tosdr_data)
-            name = tosdr_data['name'] if isinstance(tosdr_data,dict) else privacyspy_data[0]['company']
+        points_component = make_points_accordion(tosdr_data)
+        rubric_component = make_rubric_accordion(privacyspy_data)
+        privacy_score = controller.overall_privacy_score(privacyspy_data, tosdr_data)
+        name = tosdr_data['name'] if isinstance(tosdr_data,dict) else privacyspy_data[0]['company']
     else:
-        points_component = html.Div('Search is not in Database...')
-        rubric_component = html.Div('Search is not in Database...')
+        points_component = html.Div('Please Choose A Site...')
+        rubric_component = html.Div('Please Choose A Site...')
         privacy_score = None
-        name = None
+        name = ""
     
     return points_component, rubric_component, privacy_score, name
 
@@ -68,34 +60,49 @@ def make_points_accordion(points_list):
     if isinstance(points_list,str):
         return html.P(points_list)
     
-    classifications = OrderedDict()
+    order = ["Good", "Tolerable", "Bad", "Abysmal"]
+
+    classifications = {}
 
     for point in points_list['points']:
+
         classification = point['case']['classification'].capitalize()
+
+        if classification == 'Blocker':
+            classification = 'Abysmal'
+        if classification == 'Neutral':
+            classification = 'Tolerable'
+
         classifications.setdefault(classification, []).append(point)
 
-    if 'Neutral' in classifications:
-        classifications.move_to_end('Good')
-        classifications.move_to_end('Neutral')
-
-    if 'Bad' in classifications:
-        classifications.move_to_end('Good')
-        classifications.move_to_end('Neutral')
-        classifications.move_to_end('Bad')
-
-    if 'Blocker' in classifications:
-        classifications['Critical'] = classifications.pop('Blocker')
-        classifications.move_to_end('Critical')
+    # Reorder into an OrderedDict according to `order`
+    ordered_classifications = OrderedDict(
+        sorted(
+            classifications.items(),
+            key=lambda kv: order.index(kv[0]) if kv[0] in order else len(order)
+        )
+    )
 
     classification_columns = []
 
-    for classification, points in classifications.items():
+    #map icons to respective classifications
+    icon_map = {
+        'Good': 'bi bi-emoji-smile',
+        'Tolerable': 'bi bi-emoji-neutral',
+        'Bad': 'bi bi-emoji-frown',
+        'Abysmal': 'bi bi-emoji-dizzy'
+    }
+
+    for classification, points in ordered_classifications.items():
+
+        emoji = icon_map[classification]
+
         first_points = points[:4]
         extra_points = points[4:]
 
         def make_point_item(point):
             statement = point['case']['title']
-            description = point['case']['description']
+            description = point['case']['description'] if point['case']['description'] else 'No description available currently'
 
             title_row = html.Div([
                 html.Span(statement, className="points-statement"),
@@ -107,6 +114,7 @@ def make_points_accordion(points_list):
 
             return dbc.AccordionItem(body_content, title=title_row, id=f'{classification}')
         
+        #split points for increased UX 
         first_items = [make_point_item(p) for p in first_points]
         extra_items = [make_point_item(p) for p in extra_points]
 
@@ -114,7 +122,10 @@ def make_points_accordion(points_list):
         button_id = {'type': 'toggle', 'index': classification}
 
         column_content = [
-            html.H5(classification, className="text-center mb-2"),
+            html.Div([
+                html.H5(classification, className="mb-2"),
+                html.I(className=f'{emoji}'),
+            ], id='classification-title'),
             dbc.Accordion(first_items, start_collapsed=True, flush=True)
         ]
 
@@ -148,12 +159,21 @@ def make_rubric_accordion(rubric_list):
         return html.P("No rubric data available.", className="text-muted")
 
     
-    rubric_items = rubric_list[3:]
+    rubric_items = rubric_list[4:]
     categories = {}
 
     # Group questions by category
     for item in rubric_items:
         category = item.get("category")
+        if category == 'Handling':
+            category = 'How Is Your Information Handled?'
+        
+        if category == 'Transparency':
+            category = 'How Transparent Are They?'
+
+        if category == 'Collection':
+            category = 'How Do They Collect Information?'
+
         categories.setdefault(category, []).append(item)
 
     rubric_sections = []
@@ -169,7 +189,7 @@ def make_rubric_accordion(rubric_list):
 
             header_color = grade_color(score)
 
-            citations = item.get("citations")[0] if item.get("citations") else ''
+            citations = item.get("citations")[0] if item.get("citations") else 'No citation available currently'
 
             title_row = html.Div([
                 html.Span(question, className="rubric-question"),
@@ -187,9 +207,12 @@ def make_rubric_accordion(rubric_list):
 
         rubric_sections.append(
             html.Div([
-                html.H5(category, className="rubric-category"),
+                html.Div([
+                    html.H5(category, className="rubric-category"),
+                    html.I(className='bi bi-search'),
+                ], id='category-title'),
                 dbc.Accordion(accordion_items, start_collapsed=True,
-                                always_open=False, flush=True)
+                                always_open=False, flush=True, className='mb-2')
             ])
         )
 
@@ -205,35 +228,41 @@ app.layout = dbc.Container([
             dbc.Col(
                 html.Div(
                     [
-                        html.Label("Search a Company...", id="search-label", className="bar-label"),
-                        dbc.Input(placeholder='Type here...', id='search', type='search', className="bar-input"),
-                        dbc.Button("Search", id='search-btn', color='primary', className="bar-button"),
+                        dcc.Dropdown(
+                            id='site-dropdown',
+                            options = sites,
+                            placeholder="Choose a site..",
+                            clearable=False,
+                            style = {"width": "200px"}
+                        )
                     ],
                     className="search-bar"
                 ),
                 md=4, sm=12
             ),
             dbc.Col(
-                [
-                    html.Div(
-                        [
-                            html.Label("Compare Companies...", id="compare-label", className="bar-label"),
-                            dbc.Input(placeholder='Type here...', id='compare', type='search', className="bar-input"),
-                            dbc.Button("Compare", id='compare-btn', color='info', className="bar-button"),
-                        ],
-                        className="compare-bar"
-                    )
-                ],
-            id='compare-column',
-            className='hidden',
-            md=4, sm=12
-        ),
+                html.Div(
+                    [
+                        dcc.Dropdown(
+                            id='comparison-dropdown',
+                            options = sites,
+                            placeholder="Choose a site..",
+                            clearable=False,
+                            style = {"width": "200px"}
+                        )
+                    ],
+                    className = 'compare-bar'
+                ),
+                id='compare-column',
+                className="hidden",
+                md=4, sm=12
+            ),
 
              # Toggle Switch
             dbc.Col([
                 html.Div(
                     dbc.Checklist(
-                        options=[{"label": "compare", "value": 1}],
+                        options=[{"label": "Compare", "value": 1}],
                         value=[],
                         id="switch-input",
                         switch=True,
@@ -243,7 +272,7 @@ app.layout = dbc.Container([
             ], md=2, sm=12),
         ], id="header"),
 
-           
+    # ------------------ Main Content ------------------
             html.Div(
             id="dashboard-content",
 
@@ -293,8 +322,13 @@ app.layout = dbc.Container([
        
 
         html.Footer([
-                html.P("© 2025 Smart Social Monitor. All rights reserved."),
-                html.P("Data Used From PrivacySpy and TOSDR")
+                html.P("© Smart Social Monitor. All Rights Reserved. "),
+                html.P([
+                    "Data Used From ",
+                    html.A("PrivacySpy", href="https://privacyspy.org", target="_blank"),
+                    " and ",
+                    html.A("TOSDR", href="https://tosdr.org", target="_blank")
+                ])
             ], id="footer")
 
         ], fluid=True, id="main-container")
@@ -302,32 +336,24 @@ app.layout = dbc.Container([
 # ------- Callbacks -----------
 @app.callback(
     Output("dashboard-content", "children"),
-    Input('search-btn', 'n_clicks'),
-    State("search", "value"),
+    Input('site-dropdown', 'value'),
 )
 
 # fills dashboard with content
-def update_dashboard(search_click, site):
-
-    if not search_click:
-        site=site
-
-    if site:
-        site = site.replace(" ","")
+def update_dashboard(site):
 
     privacyspy_data = controller.get_privacyspy_info(site)
     tosdr_data = controller.get_tosdr_data(site)
 
     points_component, rubric_component, privacy_score, company_name = helper(privacyspy_data, tosdr_data)
-    
 
     # search gauge chart
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=privacy_score,
-        title={'text': f"{company_name.capitalize() if company_name else ''} Policy Score"},
+        title={'text': f"{company_name} Policy Score"},
         gauge={
-            'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Critical','Bad', 'Average', 'Good','Excellent']}, 
+            'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Abysmal','Bad', 'Tolerable', 'Good','Excellent']}, 
             'bar': {'color': "black"},   # needle/bar color
             'steps': [
                 {'range': [0, 2], 'color': 'red'},
@@ -402,7 +428,7 @@ def update_dashboard(search_click, site):
                 ])
             ])
         )
-    ])
+    ], className='mb-4')
     return dash_content
 
 # handles view more/less logic in points accordion
@@ -425,14 +451,14 @@ def toggle_collapse(n_clicks, is_open):
     Output('switch-input', 'value'),
     Output('compare-column', 'className'),
     Input('switch-input', 'value'),
-    Input('search-btn', 'n_clicks'),
+    Input('site-dropdown', 'value'),
     prevent_initial_call=True
 )
 
 def toggle_or_reset_compare(switch, n_clicks):
     trigger = ctx.triggered_id
 
-    if trigger == 'search-btn':
+    if trigger == 'site-dropdown':
         return [0], 'hidden'
 
     if 1 in switch:
@@ -445,17 +471,11 @@ def toggle_or_reset_compare(switch, n_clicks):
     Output("comparison-gauge-column", "children"),
     Output("comparison-gauge-column", "className"),
     Output("search-gauge-column", "width"),
-    Input("compare-btn", "n_clicks"),
-    State("compare", "value"),
+    Input("comparison-dropdown", "value"),
     prevent_initial_call=True
 )
-def update_comparison_gauge(n_clicks, compare_site):
-    if not n_clicks:
-        raise exceptions.PreventUpdate
+def update_comparison_gauge(compare_site):
     
-    if compare_site:
-        compare_site = compare_site.replace(" ","")
-
     privacyspy_data = controller.get_privacyspy_info(compare_site)
     tosdr_data = controller.get_tosdr_data(compare_site)
     compare_score = helper(privacyspy_data, tosdr_data)[2]
@@ -463,9 +483,9 @@ def update_comparison_gauge(n_clicks, compare_site):
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=compare_score,
-        title={'text': f"{compare_name.capitalize() if compare_name else ''} Policy Score"},
+        title={'text': f"{compare_name} Policy Score"},
         gauge={
-            'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Critical','Bad', 'Average', 'Good','Excellent']},
+            'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Abysmal','Bad', 'Tolerable', 'Good','Excellent']},
             'bar': {'color': "black"},
             'steps': [
                 {'range': [0, 2], 'color': 'red'},
@@ -476,7 +496,7 @@ def update_comparison_gauge(n_clicks, compare_site):
         }
     ))
     fig.update_layout(
-        paper_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(128,128,128,0.4)",
         font=dict(color = 'white')
     )
 
