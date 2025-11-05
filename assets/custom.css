@@ -24,12 +24,15 @@ h1, h2, h3, h4, h5 {
 .search-bar,
 .compare-bar {
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
+  align-items:center;
+  justify-content: center;
   margin-bottom: 0.5rem;
+  gap: 10px;
 }
 
+#site-dropdown .Select-control, #comparison-dropdown .Select-control{
+  width: 200px;
+}
 /* Hide columns when inactive */
 .hidden {
   display: none !important;
@@ -39,13 +42,11 @@ h1, h2, h3, h4, h5 {
 #header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content:space-between;
   flex-wrap: nowrap;
   gap: 1rem;
 }
-#header-switch,
-#header > .col,
-#header > div {
+#header-switch {
   display: flex;
   align-items: center;
 }
@@ -131,14 +132,20 @@ h1, h2, h3, h4, h5 {
     align-items: stretch;
   }
 
-  .header-col,
-  .header-logo,
-  .header-switch {
-    justify-content: flex-start;
+  #header-switch{
+    justify-content: center;
     align-items: center;
+    margin-bottom: 20px;
   }
+  #site-dropdown .Select-control, #comparison-dropdown .Select-control{
+  width: 375px;
+}
 
-  #logo {width: 80%;}
+  #logo {
+    width: 80%;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 576px) {

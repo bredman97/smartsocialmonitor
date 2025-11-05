@@ -228,12 +228,12 @@ app.layout = dbc.Container([
             dbc.Col(
                 html.Div(
                     [
+                        dbc.Label('Site Selection: ', html_for='site-dropdown', className='mt-2'),
                         dcc.Dropdown(
                             id='site-dropdown',
                             options = sites,
                             placeholder="Choose a site..",
                             clearable=False,
-                            style = {"width": "200px"}
                         )
                     ],
                     className="search-bar"
@@ -243,12 +243,12 @@ app.layout = dbc.Container([
             dbc.Col(
                 html.Div(
                     [
+                        dbc.Label('Comparison Selection: ', html_for='comparison-dropdown', className='mt-2'),
                         dcc.Dropdown(
                             id='comparison-dropdown',
                             options = sites,
                             placeholder="Choose a site..",
-                            clearable=False,
-                            style = {"width": "200px"}
+                            clearable=False
                         )
                     ],
                     className = 'compare-bar'
