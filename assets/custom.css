@@ -90,7 +90,7 @@ h1, h2, h3, h4, h5 {
   color:white;
   font-weight: bold;
 }
-#So-So.accordion-item .accordion-button:not(.collapsed), #So-So.accordion-item .accordion-button:hover {
+#Tolerable.accordion-item .accordion-button:not(.collapsed), #Tolerable.accordion-item .accordion-button:hover {
   background-color: var(--bs-dark) !important;
   color:white;
   font-weight: bold;
