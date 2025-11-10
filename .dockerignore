@@ -1,0 +1,8 @@
+.git
+.gitignore
+.venv/
+.vscode
+*__pycache__/
+Pipfile
+Pipfile.lock
+README.md
