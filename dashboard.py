@@ -1,4 +1,4 @@
-from dash import Dash, dcc, ctx, exceptions, html, Input, Output, State, MATCH
+from dash import Dash, dcc, ctx, html, Input, Output, State, MATCH
 from flask import Flask
 from flask_caching import Cache
 import plotly.graph_objects as go
@@ -9,11 +9,10 @@ from backend import data_metrics
 
 # initialize flask server, cache, stylesheets
 server = Flask(__name__)
-cache = Cache(server, config={'CACHE_TYPE':'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 300})
 
 app = Dash(__name__, server=server, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.BOOTSTRAP])
 load_figure_template('CYBORG')
-app.title = "Privacy Dashboard"
+app.title = "Smart Social Monitor"
 
 # initialize controller
 controller = data_metrics.Controller()
@@ -146,7 +145,7 @@ def make_points_accordion(points_list):
             ]
 
         classification_columns.append(
-            dbc.Col(column_content, width=12 // len(classifications) if len(classifications) <= 4 else 3)
+            dbc.Col(column_content, xs=12,sm=12, md= 12 // len(classifications) if classifications else 3)
         )
 
     return classification_columns
@@ -238,7 +237,7 @@ app.layout = dbc.Container([
                     ],
                     className="search-bar"
                 ),
-                md=4, sm=12
+                md=4, sm=12, xs=12
             ),
             dbc.Col(
                 html.Div(
@@ -255,7 +254,7 @@ app.layout = dbc.Container([
                 ),
                 id='compare-column',
                 className="hidden",
-                md=4, sm=12
+                md=4, sm=12, xs=12
             ),
 
              # Toggle Switch
@@ -287,7 +286,8 @@ app.layout = dbc.Container([
                                 html.Div(id="gauge-chart-placeholder")
                             ))
                         ),
-                        id='search-gauge-column'
+                        id='search-gauge-column',
+                        
                     ),
                     dbc.Col(
                         dcc.Loading(
@@ -299,6 +299,7 @@ app.layout = dbc.Container([
                             ))
                         ),
                         id='comparison-gauge-column',
+                        
                     )
                 ], className='hidden mb-3'),
 
@@ -407,7 +408,9 @@ def update_dashboard(site):
             children=dbc.Col([
                 dbc.Card(
                     dbc.CardBody([
-                        dbc.Row(points_component)
+                        html.Div(
+                            dbc.Row(points_component), 
+                            id='points-container')
                     ])
                 )
             ], className='mb-4')

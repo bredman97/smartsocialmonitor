@@ -2,6 +2,7 @@ import urllib.parse
 import requests
 import time
 from rapidfuzz import fuzz
+
 class Controller:
 
     def __init__(self):
@@ -28,6 +29,9 @@ class Controller:
         return privacyspy_data
     
     def get_privacyspy_info(self, search):
+        '''
+        search: (str)
+        '''
         
         # Load the JSON file
         data = self.privacyspy
@@ -109,6 +113,9 @@ class Controller:
         return list_of_rubric
         
     def get_tosdr_data(self, search):
+        '''
+        search: (str)
+        '''
         
         if not search:
             return None
@@ -250,6 +257,10 @@ class Controller:
 
     # compute overall privacy score    
     def overall_privacy_score(self, privacyspy_data, tosdr_data ):
+        '''
+        privacyspy_data = (list)
+        tosdr_data = (dict)
+        '''
 
         tosdr_score = self.grade_site(tosdr_data['rating']) if isinstance(tosdr_data, dict) else 0
         privacyspy_score = privacyspy_data[1]['policy_score'] if isinstance(privacyspy_data, list) else 0

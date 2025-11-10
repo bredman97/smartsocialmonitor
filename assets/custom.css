@@ -151,6 +151,13 @@ h1, h2, h3, h4, h5 {
 @media (max-width: 576px) {
   
   #logo {width: 100%;}
+  #site-dropdown .Select-control, #comparison-dropdown .Select-control{
+  width: 280px;
+}
+  #search-gauge-column,
+  #comparison-gauge-column {
+    width: 100% !important;
+  }
 }
 
 
