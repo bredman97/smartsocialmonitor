@@ -1,26 +1,10 @@
 
 
-h1, h2, h3, h4, h5 {
-  letter-spacing: 0.5px;
+/* ======================== HEADER BAR ALIGNMENT ======================= */
+#main-container {
+  justify-content: center;
+  padding: 1.2rem !important;
 }
-
-/* Container */
-.container-fluid {
-  padding: 1.5rem !important;
-}
-
-@media (max-width: 768px) {
-  .container-fluid { padding: 0.75rem !important; }
-  h1 { font-size: 1.75rem; }
-}
-
-/* =========================================================
-   HEADER
-   ========================================================= */
-/* =========================================================
-   HEADER BAR ALIGNMENT
-   ========================================================= */
-
 .search-bar,
 .compare-bar {
   display: flex;
@@ -38,13 +22,12 @@ h1, h2, h3, h4, h5 {
   display: none !important;
 }
 
-/* Ensure logo + bars + switch align properly */
 #header {
   display: flex;
   align-items: center;
   justify-content:space-between;
   flex-wrap: nowrap;
-  gap: 1rem;
+  gap: 0.3rem;
 }
 #header-switch {
   display: flex;
@@ -56,9 +39,29 @@ h1, h2, h3, h4, h5 {
   width: 100%;
 }
 
+#site-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#site-logo img {
+  height: 10%;
+  width: 10%;
+  object-fit: scale-down;
+  
+}
+
+#policy-links {
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 3px 15px springgreen;
 }
 
 #category-title{
@@ -82,10 +85,12 @@ h1, h2, h3, h4, h5 {
 
 #footer{
   display:flex;
+  font-size: small;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
-
+/* ================= Colors accordion buttons ================== */
 #Good.accordion-item .accordion-button:not(.collapsed), #Good.accordion-item .accordion-button:hover {
   background-color: var(--bs-success) !important;
   color:white;
@@ -123,13 +128,11 @@ h1, h2, h3, h4, h5 {
   color:white;
   font-weight: bold;
 }
-/* =========================================================
-   RESPONSIVE GRID
-   ========================================================= */
-@media (max-width: 760px) {
+/* ========================= RESPONSIVE ==================================== */
+@media (max-width: 880px) {
   #header {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
   }
 
   #header-switch{
@@ -142,7 +145,7 @@ h1, h2, h3, h4, h5 {
 }
 
   #logo {
-    width: 80%;
+    width: 100%;
     align-items: center;
     justify-content: center;
   }
@@ -152,12 +155,22 @@ h1, h2, h3, h4, h5 {
   
   #logo {width: 100%;}
   #site-dropdown .Select-control, #comparison-dropdown .Select-control{
-  width: 280px;
+  width: 240px;
+}
+#footer{
+  display:flex;
+  font-size: xx-small;
+  align-items: center;
+  justify-content: space-between;
 }
   #search-gauge-column,
   #comparison-gauge-column {
     width: 100% !important;
   }
+  #main-container {
+  justify-content: center;
+  padding: 1.2rem !important;
+}
 }
 
 

@@ -54,7 +54,7 @@ class Controller:
                 break
 
             # only fuzzy search for first word in string as that tends to be parent company
-            elif search.split()[0] in product['name']:
+            elif search.lower().split()[0] in product['name'].lower():
                 fuzzy = fuzz.ratio(search.lower(), product['name'].lower())
                 fuzzy1 = fuzz.partial_ratio(search.lower(), product['name'].lower())
                 if fuzzy>=51 and fuzzy1>=87:
@@ -76,15 +76,16 @@ class Controller:
 
         
         # get all useful data
-        company_name = company['name']
-        policy_score = company['score']
-        company_slug = company['slug']
-        hostnames = company['hostnames']
         
-        list_of_rubric.append({'company': company_name})
-        list_of_rubric.append({'policy_score':policy_score})
-        list_of_rubric.append({'hostnames':hostnames})
-        list_of_rubric.append({'company_slug': company_slug})
+        list_of_rubric.append(
+            {
+            'company': company['name'],
+            'policy_score': company['score'],
+            'icon': company['icon'],
+            'sources': company['sources']
+            }
+        )
+        
 
         rubric = company['rubric']
 
@@ -144,13 +145,18 @@ class Controller:
         
         # if succeeds but search is not in data then return msg
         if len(tosdr_search_json['services']) == 0:
-            return 'No match'
+            return 'No points available...'
         
         # grabs first id - api data is already fuzzy search enabled
         # makes sure that it is the right search
         search_id=''
         for service in tosdr_search_json['services']:
-            if service['name'].lower() == search.lower():
+            if service['rating'] == 'N/A':
+                continue
+            elif service['name'].lower() == search.lower():
+                search_id = service['id']
+                break
+            elif any(search.lower() in url.lower() for url in service['urls']):
                 search_id = service['id']
                 break
 
@@ -169,15 +175,17 @@ class Controller:
             tosdr_service_json = tosdr_service.json()
         elif tosdr_service.status_code == 429:
             return 'Sent Too Many Requests...'
+        elif tosdr_service.status_code == 422:
+            return 'No Points Available...'
         else:
             return None
 
         # dictionary of useful data
         tosdr_data = {
             'name': tosdr_service_json['name'],
-            'slug': tosdr_service_json['slug'],
             'rating': tosdr_service_json['rating'],
-            'urls':tosdr_service_json['urls'], 
+            'image':tosdr_service_json['image'], 
+            'documents':tosdr_service_json['documents'],
             'points': tosdr_service_json['points']
         }
         
@@ -206,14 +214,38 @@ class Controller:
             elif tosdr_search.status_code == 429: #too many requests so pause
                 time.sleep(1)
                 
-            
+            filtered_sites = [
+                "YouPorn",
+                "XVideos",
+                "Pornhub",
+                "Spankbang",
+                "4porn",
+                "Thumbzilla",
+                "Rule34",
+                "Danbooru",
+                "FAKKU",
+                "e621/e926",
+                "CockFile",
+                "OnlyFans",
+                "Weasyl",
+                "Pixiv",
+                "Cock.li",
+                "deprecated",
+                "depricated",
+                "deleted",
+                "discontinued"
+
+            ]
+
             for search in tosdr_search_json['services']:
-                try:
                     
-                    # sanitize unused entries
-                    response.append(search['name'].title()) if (not 'deprecated' in search['name'].lower() or not 'deleted' in search['name'].lower()) and search['slug'] and search['rating'] != 'N/A' else ''
-                except TypeError:
+                # sanitize filtered entries
+                if any(site.lower() in search['name'].lower() for site in filtered_sites):
                     continue
+
+                if search['slug'] and search['rating'] != 'N/A':
+                    response.append(search['name'].title())
+
             
             #pagination
             current_page = tosdr_search_json['page']['current']
@@ -236,6 +268,8 @@ class Controller:
             else:
                 response.append(product['name'].title()) if product['slug'] else ''
         
+        response.sort()
+
         return response
     
     # turns tosdr grade into a num
@@ -254,7 +288,6 @@ class Controller:
         else:
             return 0
     
-
     # compute overall privacy score    
     def overall_privacy_score(self, privacyspy_data, tosdr_data ):
         '''
@@ -263,8 +296,7 @@ class Controller:
         '''
 
         tosdr_score = self.grade_site(tosdr_data['rating']) if isinstance(tosdr_data, dict) else 0
-        privacyspy_score = privacyspy_data[1]['policy_score'] if isinstance(privacyspy_data, list) else 0
-
+        privacyspy_score = privacyspy_data[0]['policy_score'] if isinstance(privacyspy_data, list) else 0
 
         if tosdr_score == 0:
             overall_score = privacyspy_score
@@ -273,8 +305,57 @@ class Controller:
         elif tosdr_score == 0 and privacyspy_score == 0:
             overall_score = None
         else:
-            overall_score = privacyspy_score + tosdr_score / 20
+            overall_score = (privacyspy_score + tosdr_score) / 2
 
         return overall_score
+    
+    #gets the logo of the chosen site
+    def get_site_image(self, privacyspy_data, tosdr_data):
+        
+        if isinstance(tosdr_data, dict) and isinstance(privacyspy_data, list):
+            image_url = tosdr_data['image']
+            image_res = requests.get(image_url)
+            if image_res.status_code == 200:
+                return image_url
+            else:
+                image_url = 'https://privacyspy.org/static/icons/'
+                return image_url + privacyspy_data[0]['icon']
+        elif isinstance(tosdr_data, dict) and isinstance(privacyspy_data, str):
+            image_url = tosdr_data['image']
+            image_res = requests.get(image_url)
+            if image_res.status_code == 200:
+                return image_url
+            else:
+                return None
+        elif isinstance(tosdr_data, str) and isinstance(privacyspy_data, list):
+            url = 'https://privacyspy.org/static/icons/'
+            return url + privacyspy_data[0]['icon']
+        else:
+            return None
+    
+    #gets the policy links of the chosen site
+    def get_policy_urls(self, privacyspy_data, tosdr_data):
 
+        if isinstance(tosdr_data, dict) and isinstance(privacyspy_data, list):
+            policies = {}
 
+            for doc in tosdr_data['documents']:
+                policies[doc['name']] = doc['url']
+
+            return policies
+        elif isinstance(tosdr_data, dict) and isinstance(privacyspy_data, str):
+            policies = {}
+
+            for doc in tosdr_data['documents']:
+                policies[doc['name']] = doc['url']
+
+            return policies
+        elif isinstance(privacyspy_data, list) and isinstance(tosdr_data, str):
+            policies = {}
+
+            for i, link in enumerate(privacyspy_data[0]['sources']):
+                policies[f'Policy Link {i+1}'] = link
+
+            return policies
+        else:
+            return None

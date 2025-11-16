@@ -54,7 +54,7 @@ def helper(privacyspy_data, tosdr_data):
 def make_points_accordion(points_list):
     
     if not points_list:
-        return html.P('Try a different search')
+        return html.P('No Points Available...')
     
     if isinstance(points_list,str):
         return html.P(points_list)
@@ -158,7 +158,7 @@ def make_rubric_accordion(rubric_list):
         return html.P("No rubric data available.", className="text-muted")
 
     
-    rubric_items = rubric_list[4:]
+    rubric_items = rubric_list[1:]
     categories = {}
 
     # Group questions by category
@@ -217,6 +217,46 @@ def make_rubric_accordion(rubric_list):
 
     return html.Div(rubric_sections, id = 'rubric-sections')
 
+# helper function for displaying policy links
+def policy_links(policies):
+
+    if not policies:
+        return None
+
+    policy_links=[]
+        
+    for i, (name, link) in enumerate(policies.items()):
+        spacer = " | " if i < (len(policies.items()) - 1) else ""
+        policy_links.append(html.A(name+spacer, href=link, target="_blank"))
+    
+    first_links = policy_links[:3]
+    extra_links = policy_links[3:]
+
+    links_content = [
+        html.Div("Policy Links:",className='fw-bold mb-2'),
+        html.Div(first_links)
+    ]
+    
+    if extra_links:
+        links_content += [
+            dbc.Collapse(
+                html.Div(extra_links, className='mb-2'),
+                id={'type':'collapse', 'index': 'policy-link'},
+                is_open=False
+            ),
+            dbc.Button(
+                "View more",
+                id={'type':'toggle', 'index': 'policy-link'},
+                color="link",
+                size="sm",
+            )
+        ]
+    
+                                
+    return html.Div(links_content, id='policy-links')
+
+
+     
 # -------------- Layout --------------
 
 app.layout = dbc.Container([
@@ -247,6 +287,7 @@ app.layout = dbc.Container([
                             id='comparison-dropdown',
                             options = sites,
                             placeholder="Choose a site..",
+                            disabled = True,
                             clearable=False
                         )
                     ],
@@ -323,7 +364,17 @@ app.layout = dbc.Container([
        
 
         html.Footer([
-                html.P("© Smart Social Monitor. All Rights Reserved. "),
+                html.P("© Smart Social Monitor. All Rights Reserved."),
+                html.P([
+                    "Developed by: ",
+                    html.A("Brandon", href="https://www.linkedin.com/in/brandon-redman-209732232/", target="_blank"),
+                    " | ",
+                    html.A("Munim", href="https://www.linkedin.com/in/munimmelaque/", target="_blank"),
+                    " | ",
+                    html.A("Ayman", href="https://www.linkedin.com/in/ayman-najmuddin-406519284/", target="_blank"),
+                    " | ",
+                    html.A("Ragib", href="", target="_blank"),
+                ]),
                 html.P([
                     "Data Used From ",
                     html.A("PrivacySpy", href="https://privacyspy.org", target="_blank"),
@@ -348,11 +399,14 @@ def update_dashboard(site):
 
     points_component, rubric_component, privacy_score, company_name = helper(privacyspy_data, tosdr_data)
 
+    image = controller.get_site_image(privacyspy_data, tosdr_data)
+    policies = controller.get_policy_urls(privacyspy_data, tosdr_data)
+
     # search gauge chart
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=privacy_score,
-        title={'text': f"{company_name} Policy Score"},
+        title={'text': f"{company_name.title()} Policy Score"},
         gauge={
             'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Abysmal','Bad', 'Tolerable', 'Good','Excellent']}, 
             'bar': {'color': "black"},   # needle/bar color
@@ -368,9 +422,9 @@ def update_dashboard(site):
     )
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color = 'white')
+        font=dict(color = 'white'),
     )
-    
+
     # ---------- Return dynamic dashboard content ----------
     dash_content = html.Div([
         
@@ -383,21 +437,16 @@ def update_dashboard(site):
                     color="#0d6efd",
                     delay_hide = 500 ,
                     children=dbc.Card(
-                        dbc.CardBody(dcc.Graph(figure=fig, id="gauge-chart"))
+                        dbc.CardBody([
+                            html.Div(html.Img(src=image, alt="") if image else None, id='site-logo'),
+                            dcc.Graph(figure=fig, id="gauge-chart"),
+                            policy_links(policies)
+                        ])
                     )
                 )
             ],id='search-gauge-column', className='mb-2'),
 
-            dbc.Col([
-                dcc.Loading(
-                    type="circle",
-                    color="#0d6efd",
-                    delay_hide = 500 ,
-                    children=dbc.Card(
-                        dbc.CardBody(dcc.Graph(figure=fig, id="comparison-gauge-chart"))
-                    )
-                )
-            ], id='comparison-gauge-column', width=6, className='hidden mb-2')
+            dbc.Col([], id='comparison-gauge-column', width=6, className='hidden mb-2')
         ], className='mb-3'),
 
         # Points component section
@@ -469,6 +518,24 @@ def toggle_or_reset_compare(switch, n_clicks):
     else:
         return switch, 'hidden'
 
+# handles logic for compare dropdown list
+# enables the compare dropdown only when a site is selected
+@app.callback(
+    Output('comparison-dropdown', 'options'),
+    Output('comparison-dropdown', 'disabled'),
+    Input('site-dropdown', 'value'),
+    prevent_initial_call=True
+)
+def update_comparison_dropdown(site):
+    if site:
+        comparison_sites = [s for s in sites if s != site]
+        return comparison_sites, False
+    else:
+        return sites, True
+
+
+
+
 # handles logic for showing comparison gauge chart
 @app.callback(
     Output("comparison-gauge-column", "children"),
@@ -483,10 +550,12 @@ def update_comparison_gauge(compare_site):
     tosdr_data = controller.get_tosdr_data(compare_site)
     compare_score = helper(privacyspy_data, tosdr_data)[2]
     compare_name = helper(privacyspy_data, tosdr_data)[3]
+    compare_image = controller.get_site_image(privacyspy_data, tosdr_data)
+    compare_policies = controller.get_policy_urls(privacyspy_data, tosdr_data)
     fig = go.Figure(go.Indicator(
         mode='gauge+number',
         value=compare_score,
-        title={'text': f"{compare_name} Policy Score"},
+        title={'text': f"{compare_name.title()} Policy Score"},
         gauge={
             'axis': {'range': [0, 10], 'tickvals':[0,2,5,8,10], 'ticktext':['Abysmal','Bad', 'Tolerable', 'Good','Excellent']},
             'bar': {'color': "black"},
@@ -499,11 +568,22 @@ def update_comparison_gauge(compare_site):
         }
     ))
     fig.update_layout(
-        paper_bgcolor="rgba(128,128,128,0.4)",
+        paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color = 'white')
     )
 
-    return dbc.Card(dbc.CardBody(dcc.Graph(figure=fig, id="comparison-gauge-chart"))), '', 6
+    return dcc.Loading(
+            type="circle",
+            color="#0d6efd",
+            delay_hide = 500 ,
+            children=dbc.Card(
+                dbc.CardBody([
+                    html.Div(html.Img(src=compare_image, alt=''), id='site-logo'),
+                    dcc.Graph(figure=fig, id="comparison-gauge-chart"),
+                    policy_links(compare_policies)
+                ]),
+                color='secondary'
+        )), '', 6
 
 
 if __name__ == "__main__":
