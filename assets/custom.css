@@ -61,7 +61,10 @@
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 3px 15px springgreen;
+  box-shadow:
+  0 3px 15px rgba(50, 165, 27, 0.6),
+  0 3px 15px rgba(50, 165, 27, 0.2),
+  inset 0 3px 15px rgba(50, 165, 27, 0.1);
 }
 
 #category-title{

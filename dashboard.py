@@ -285,7 +285,7 @@ app.layout = dbc.Container([
                         dbc.Label('Comparison Selection: ', html_for='comparison-dropdown', className='mt-2'),
                         dcc.Dropdown(
                             id='comparison-dropdown',
-                            options = sites,
+                            options = [],
                             placeholder="Choose a site..",
                             disabled = True,
                             clearable=False
@@ -569,7 +569,7 @@ def update_comparison_gauge(compare_site):
     ))
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color = 'white')
+        font=dict(color = 'white'),
     )
 
     return dcc.Loading(
