@@ -1,8 +1,5 @@
 FROM python:3.13-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
 WORKDIR /smartsocialmonitor
 
 RUN addgroup --system ssmgroup && adduser --system --ingroup ssmgroup ssmuser
@@ -19,4 +16,4 @@ USER ssmuser
 
 EXPOSE 8000
 
-CMD ["/bin/sh", "-c", "gunicorn -w 2 -b 0.0.0.0:${PORT:-8000} dashboard:server"]
+CMD [ "gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "dashboard:server"]
