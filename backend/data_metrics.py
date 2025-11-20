@@ -2,6 +2,7 @@ import urllib.parse
 import requests
 import time
 from rapidfuzz import fuzz
+from backend.cache_setup import cache
 
 class Controller:
 
@@ -9,6 +10,7 @@ class Controller:
         #initialize class by getting full privacyspy json
         self.privacyspy = self.get_privacyspy_data()
 
+    @cache.memoize(timeout=86400)
     def get_privacyspy_data(self):
         #gets full privacyspy json
         PRIVACYSPY_URL = "https://privacyspy.org/api/v2/products.json"
@@ -28,6 +30,7 @@ class Controller:
         
         return privacyspy_data
     
+    @cache.memoize(timeout=86400)
     def get_privacyspy_info(self, search):
         '''
         search: (str)
@@ -110,9 +113,10 @@ class Controller:
                     'citations': item['citations'],
                     'score': round(score)
                     })
-
+                
         return list_of_rubric
-        
+
+    @cache.memoize(timeout=86400)  
     def get_tosdr_data(self, search):
         '''
         search: (str)
@@ -192,6 +196,7 @@ class Controller:
         return tosdr_data
     
     # gets list of all sites
+    @cache.memoize(timeout=86400)
     def get_site_list(self):
         TOSDR_ALLSERVICE_URL = "https://api.tosdr.org/service/v3?"
 
@@ -288,7 +293,9 @@ class Controller:
         else:
             return 0
     
-    # compute overall privacy score    
+    
+    # compute overall privacy score
+    @cache.memoize(timeout=86400)
     def overall_privacy_score(self, privacyspy_data, tosdr_data ):
         '''
         privacyspy_data = (list)
@@ -310,6 +317,7 @@ class Controller:
         return overall_score
     
     #gets the logo of the chosen site
+    @cache.memoize(timeout=86400)
     def get_site_image(self, privacyspy_data, tosdr_data):
         
         if isinstance(tosdr_data, dict) and isinstance(privacyspy_data, list):
@@ -334,6 +342,7 @@ class Controller:
             return None
     
     #gets the policy links of the chosen site
+    @cache.memoize(timeout=86400)
     def get_policy_urls(self, privacyspy_data, tosdr_data):
 
         if isinstance(tosdr_data, dict) and isinstance(privacyspy_data, list):

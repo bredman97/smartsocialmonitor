@@ -16,4 +16,4 @@ USER ssmuser
 
 EXPOSE 8050
 
-CMD [ "gunicorn", "-w", "2", "-b", "0.0.0.0:8050", "dashboard:server"]
+CMD [ "gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "dashboard:server"]

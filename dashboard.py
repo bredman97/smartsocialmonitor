@@ -1,6 +1,6 @@
 from dash import Dash, dcc, ctx, html, Input, Output, State, MATCH
 from flask import Flask
-from flask_caching import Cache
+from backend import cache_setup
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
@@ -9,6 +9,8 @@ from backend import data_metrics
 
 # initialize flask server, cache, stylesheets
 server = Flask(__name__)
+cache = cache_setup.cache
+cache.init_app(server, config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT':86400})
 
 app = Dash(__name__, server=server, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.BOOTSTRAP])
 load_figure_template('CYBORG')
@@ -271,7 +273,7 @@ app.layout = dbc.Container([
                         dcc.Dropdown(
                             id='site-dropdown',
                             options = sites,
-                            placeholder="Choose a site..",
+                            placeholder="Type a site..",
                             clearable=False,
                         )
                     ],
@@ -286,7 +288,7 @@ app.layout = dbc.Container([
                         dcc.Dropdown(
                             id='comparison-dropdown',
                             options = [],
-                            placeholder="Choose a site..",
+                            placeholder="Type a site..",
                             disabled = True,
                             clearable=False
                         )
@@ -373,7 +375,7 @@ app.layout = dbc.Container([
                     " | ",
                     html.A("Ayman", href="https://www.linkedin.com/in/ayman-najmuddin-406519284/", target="_blank"),
                     " | ",
-                    html.A("Ragib", href="", target="_blank"),
+                    html.A("Ragib", href="https://www.linkedin.com/in/ragib-ehsan", target="_blank"),
                 ]),
                 html.P([
                     "Data Used From ",
@@ -438,7 +440,7 @@ def update_dashboard(site):
                     delay_hide = 500 ,
                     children=dbc.Card(
                         dbc.CardBody([
-                            html.Div(html.Img(src=image, alt="") if image else None, id='site-logo'),
+                            html.Div(html.Div(html.Img(src=image, alt="") if image else None, id='site-logo'), id='site-logo-div'),
                             dcc.Graph(figure=fig, id="gauge-chart"),
                             policy_links(policies)
                         ])
@@ -578,7 +580,7 @@ def update_comparison_gauge(compare_site):
             delay_hide = 500 ,
             children=dbc.Card(
                 dbc.CardBody([
-                    html.Div(html.Img(src=compare_image, alt=''), id='site-logo'),
+                    html.Div(html.Div(html.Img(src=compare_image, alt='') if compare_image else None, id='site-logo'), id='site-logo-div'),
                     dcc.Graph(figure=fig, id="comparison-gauge-chart"),
                     policy_links(compare_policies)
                 ]),
