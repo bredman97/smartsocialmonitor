@@ -14,6 +14,6 @@ RUN chown -R ssmuser:ssmgroup /smartsocialmonitor
 
 USER ssmuser
 
-EXPOSE 8000
+EXPOSE 10000
 
-CMD [ "gunicorn", "-w", "2", "-b", "0.0.0.0:8000", "dashboard:server"]
+CMD [ "gunicorn", "-w", "2", "-b", "0.0.0.0:10000", "dashboard:server"]
