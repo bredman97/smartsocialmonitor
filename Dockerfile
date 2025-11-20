@@ -16,4 +16,4 @@ USER ssmuser
 
 EXPOSE 8000
 
-CMD [ "gunicorn", "-w", "2", "-b", "0.0.0.0:${PORT:-8000}", "dashboard:server"]
+CMD gunicorn -w 2 -b 0.0.0.0:${PORT:-8000} dashboard:server
