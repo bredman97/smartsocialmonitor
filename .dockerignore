@@ -6,3 +6,5 @@
 Pipfile
 Pipfile.lock
 README.md
+analysis.csv
+site_analysis.py

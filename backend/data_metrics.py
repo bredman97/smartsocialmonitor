@@ -202,24 +202,7 @@ class Controller:
 
         params = {'page':1}
 
-        response = []
-        while True:
-            # check if search is in tosdr
-            service_url = TOSDR_ALLSERVICE_URL + urllib.parse.urlencode(params)
-            time.sleep(1)
-            # return none if search endpoint fails
-            try:
-                tosdr_search = requests.get(service_url)
-            except Exception:
-                return None
-
-            # return none if request is unsuccessful
-            if tosdr_search.status_code == 200:
-                tosdr_search_json = tosdr_search.json()
-            elif tosdr_search.status_code == 429: #too many requests so pause
-                time.sleep(1)
-                
-            filtered_sites = [
+        filtered_sites = [
                 "YouPorn",
                 "XVideos",
                 "Pornhub",
@@ -238,9 +221,29 @@ class Controller:
                 "deprecated",
                 "depricated",
                 "deleted",
-                "discontinued"
+                "discontinued",
+                "startpage.com"
 
             ]
+
+        response = []
+        while True:
+            # check if search is in tosdr
+            service_url = TOSDR_ALLSERVICE_URL + urllib.parse.urlencode(params)
+            time.sleep(1)
+            # return none if search endpoint fails
+            try:
+                tosdr_search = requests.get(service_url)
+            except Exception:
+                return None
+
+            # return none if request is unsuccessful
+            if tosdr_search.status_code == 200:
+                tosdr_search_json = tosdr_search.json()
+            elif tosdr_search.status_code == 429: #too many requests so pause
+                time.sleep(1)
+                
+            
 
             for search in tosdr_search_json['services']:
                     
@@ -251,7 +254,6 @@ class Controller:
                 if search['slug'] and search['rating'] != 'N/A':
                     response.append(search['name'].title())
 
-            
             #pagination
             current_page = tosdr_search_json['page']['current']
             end_page = tosdr_search_json['page']['end']
@@ -269,6 +271,8 @@ class Controller:
             name = product['name'] if product['slug'] else ''
 
             if any(name.lower().split()[0] in res.lower() for res in response):
+                continue
+            elif name.lower() in filtered_sites:
                 continue
             else:
                 response.append(product['name'].title()) if product['slug'] else ''

@@ -5,19 +5,19 @@ import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 from collections import OrderedDict
-from backend import data_metrics
+from backend.data_metrics import Controller
 
 # initialize flask server, cache, stylesheets
 server = Flask(__name__)
 cache = cache_setup.cache
 cache.init_app(server, config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT':86400})
 
-app = Dash(__name__, server=server, external_stylesheets=[dbc.themes.CYBORG, dbc.icons.BOOTSTRAP])
+app = Dash(__name__, server=server, external_stylesheets=[dbc.themes.CYBORG+ "?v=1", dbc.icons.BOOTSTRAP])
 load_figure_template('CYBORG')
 app.title = "Smart Social Monitor"
 
 # initialize controller
-controller = data_metrics.Controller()
+controller = Controller()
 
 sites = controller.get_site_list()
 
